@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xxl-job-config
+  namespace: common
+data:
+  PARAMS: "--spring.datasource.url=jdbc:mysql://10.98.75.250:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+  --spring.datasource.username=root
+  --spring.datasource.password=123456
+  --xxl.job.login.username=admin
+  --xxl.job.login.password=123456"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xxl-job
+  namespace: common
+spec:
+  selector:
+    app: xxl-job
+  ports:
+    - port: 8080
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xxl-job
+  namespace: common
+  labels:
+    app: xxl-job
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: xxl-job
+      labels:
+        app: xxl-job
+    spec:
+      containers:
+        - name: xxl-job
+          image: xuxueli/xxl-job-admin:2.2.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: xxl-job-config
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /data/applogs
+              name: xxl-job-logs-persistent-storage
+      restartPolicy: Always
+      volumes:
+        - name: xxl-job-logs-persistent-storage
+          persistentVolumeClaim:
+            claimName: host-pvc
+  selector:
+    matchLabels:
+      app: xxl-job
+
