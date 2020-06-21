@@ -31,8 +31,8 @@ spec:
     spec:
       containers:
         - name: nacos
-          image: docker.repo.kpy.cloud/kpybase/nacos-server:1.1.4
-          imagePullPolicy: Always
+          image: nacos/nacos-server:1.2.1
+          imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
                 name: nacos-config
